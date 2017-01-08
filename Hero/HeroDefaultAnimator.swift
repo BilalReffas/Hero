@@ -24,7 +24,6 @@ import UIKit
 
 public class HeroDefaultAnimator:HeroAnimator{
   var context:HeroContext!
-  let animatableOptions:Set<String> = ["fade", "opacity", "position", "size", "cornerRadius", "transform", "scale", "translate", "rotate"]
   var viewContexts:[UIView: HeroDefaultAnimatorViewContext] = [:]
 
   public func seekTo(timePassed:TimeInterval) {
@@ -42,19 +41,21 @@ public class HeroDefaultAnimator:HeroAnimator{
     return duration
   }
   
-  public func temporarilySet(view:UIView, to modifiers:HeroModifiers){
+  public func temporarilySet(view:UIView, targetState:HeroTargetState){
     guard viewContexts[view] != nil else {
       print("HERO: unable to temporarily set to \(view). The view must be running at least one animation before it can be interactively changed")
       return
     }
-    viewContexts[view]!.temporarilySet(modifiers:modifiers)
+    viewContexts[view]!.temporarilySet(targetState:targetState)
   }
 
   public func canAnimate(context:HeroContext, view:UIView, appearing:Bool) -> Bool{
-    if let modifierNames = context.modifierNames(for: view){
-      return self.animatableOptions.intersection(Set(modifierNames)).count > 0
-    }
-    return false
+    guard let state = context[view] else { return false }
+    return state.position != nil ||
+           state.size != nil ||
+           state.transform != nil ||
+           state.cornerRadius != nil ||
+           state.opacity != nil
   }
 
   public func animate(context:HeroContext, fromViews:[UIView], toViews:[UIView]) -> TimeInterval{
@@ -79,7 +80,7 @@ public class HeroDefaultAnimator:HeroAnimator{
   
   func animate(view:UIView, appearing:Bool){
     let snapshot = context.snapshotView(for: view)
-    let viewContext = HeroDefaultAnimatorViewContext(animator:self, view: view, snapshot: snapshot, modifiers: context[view]!, appearing: appearing)
+    let viewContext = HeroDefaultAnimatorViewContext(animator:self, snapshot: snapshot, targetState: context[view]!, appearing: appearing)
     viewContexts[view] = viewContext
   }
   

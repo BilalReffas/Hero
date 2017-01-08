@@ -46,7 +46,7 @@
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                         <real key="value" value="24"/>
                                     </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="heroModifiers" value="fade translate(0, -150)"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="heroModifierString" value="fade translate(0, -150)"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="heroID" value="back"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
@@ -76,6 +76,8 @@
                         <userDefinedRuntimeAttribute type="boolean" keyPath="isHeroEnabled" value="YES"/>
                     </userDefinedRuntimeAttributes>
                     <connections>
+                        <outlet property="label1" destination="qqY-v9-0h5" id="Ibt-7y-MoP"/>
+                        <outlet property="label2" destination="qZ9-bg-jSy" id="fJs-lN-Ngs"/>
                         <outlet property="pluginSwitch" destination="zId-Ss-SLS" id="mVh-Cm-pgv"/>
                     </connections>
                 </viewController>

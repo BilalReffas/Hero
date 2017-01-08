@@ -22,26 +22,17 @@
 
 import UIKit
 
-class CityGuideViewController: UIViewController {
-  @IBOutlet weak var collectionView: UICollectionView!
-  var cities = City.cities
-  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-    if let currentCell = sender as? CityCell,
-       let vc = segue.destination as? CityViewController,
-       let currentCellIndex = collectionView.indexPath(for: currentCell){
-      vc.selectedIndex = currentCellIndex
+public class IgnoreSubviewModifiersPreprocessor:HeroPreprocessor {
+  public func process(context:HeroContext, fromViews:[UIView], toViews:[UIView]) {
+    for view in fromViews + toViews{
+      guard context[view]?.ignoreSubviewModifiers == true else { continue }
+      var parentView = view
+      if let _  = view as? UITableView, let wrapperView = view.subviews.get(0) {
+        parentView = wrapperView
+      }
+      for subview in parentView.subviews{
+        context[subview] = nil
+      }
     }
-  }
-}
-
-extension CityGuideViewController:UICollectionViewDataSource, UICollectionViewDelegate{
-  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
-    return cities.count
-  }
-
-  func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "item", for: indexPath) as! CityCell
-    cell.city = cities[indexPath.item]
-    return cell
   }
 }

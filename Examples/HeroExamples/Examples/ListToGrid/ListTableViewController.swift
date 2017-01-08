@@ -27,8 +27,9 @@ class ListTableViewCell:UITableViewCell{
   override func layoutSubviews() {
     super.layoutSubviews()
     imageView?.frame.origin.x = 0
-    textLabel?.frame.origin.x -= 15
-    detailTextLabel?.frame.origin.x -= 15
+    imageView?.frame.size = CGSize(width: bounds.height, height: bounds.height)
+    textLabel?.frame.origin.x = bounds.height + 10
+    detailTextLabel?.frame.origin.x = bounds.height + 10
   }
 }
 
@@ -39,16 +40,16 @@ class ListTableViewController: UITableViewController {
   }
   
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return 50
+    return ImageLibrary.count
   }
   
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "item", for: indexPath)
 
-    cell.heroModifiers = "fade translate(-100, 0)"
+    cell.heroModifiers = [.fade, .translate(x:-100)]
     cell.imageView?.heroID = "image_\(indexPath.item)"
-    cell.imageView?.heroModifiers = "arc zPosition(10)"
-    cell.imageView?.image = UIImage(named: "Unsplash\(indexPath.item % 10)")
+    cell.imageView?.heroModifiers = [.arc, .zPosition(10)]
+    cell.imageView?.image = ImageLibrary.thumbnail(index:indexPath.item)
     cell.textLabel?.text = "Item \(indexPath.item)"
     cell.detailTextLabel?.text = "Description \(indexPath.item)"
     
@@ -77,16 +78,16 @@ class ListTableViewController: UITableViewController {
 extension ListTableViewController:HeroViewControllerDelegate{
   func heroWillStartAnimatingTo(viewController: UIViewController) {
     if let _ = viewController as? GridCollectionViewController{
-      tableView.heroModifiers = "clearSubviewModifiers"
+      tableView.heroModifiers = [.ignoreSubviewModifiers]
     } else {
-      tableView.heroModifiers = "cascade(0.02)"
+      tableView.heroModifiers = [.cascade]
     }
   }
   func heroWillStartAnimatingFrom(viewController: UIViewController) {
     if let _ = viewController as? GridCollectionViewController{
-      tableView.heroModifiers = "clearSubviewModifiers"
+      tableView.heroModifiers = [.ignoreSubviewModifiers]
     } else {
-      tableView.heroModifiers = "cascade(0.02)"
+      tableView.heroModifiers = [.cascade]
     }
     if let vc = viewController as? ImageViewController,
       let originalCellIndex = vc.selectedIndex,

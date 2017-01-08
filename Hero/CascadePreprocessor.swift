@@ -60,34 +60,39 @@ public class CascadePreprocessor:HeroPreprocessor {
   }
 
   public func process(context:HeroContext, fromViews:[UIView], toViews:[UIView]) {
-    for fv in fromViews + toViews{
-      guard let options = context[fv, "cascade"],
-            let deltaTime = options.getCGFloat(0)
-        else { continue }
+    process(context:context, views:fromViews)
+    process(context:context, views:toViews)
+  }
+  
+  private func process(context:HeroContext, views:[UIView]){
+    for (viewIndex, fv) in views.enumerated() {
+      guard let (deltaTime, direction, delayMatchedViews) = context[fv]?.cascade else { continue }
       
-      let directionString = options.get(1)
-      let direction = CascadeDirection(directionString ?? "") ?? .topToBottom
       var parentView = fv
       if let _  = fv as? UITableView, let wrapperView = fv.subviews.get(0) {
         parentView = wrapperView
       }
       
       let sortedSubviews = parentView.subviews.filter{
-        return context[$0, "matchedHeroID"] == nil
-      }.sorted(by: direction.comparator)
+        return context.pairedView(for: $0) == nil
+        }.sorted(by: direction.comparator)
       
-      let initialDelay = options.getCGFloat(2) ?? 0
+      let initialDelay = context[fv]!.delay
       for (i, v) in sortedSubviews.enumerated(){
-        let cDelay = CGFloat(i) * deltaTime + initialDelay
-        context[v, "delay"] = ["\(cDelay)"]
+        let delay = TimeInterval(i) * deltaTime + initialDelay
+        context[v]?.delay = delay
       }
       
-      if let str = options.get(3), let shouldDelayMatchedChild = Bool(str), shouldDelayMatchedChild{
-        for v in parentView.subviews{
-          if context[v, "matchedHeroID"] != nil, let pairedView = context.pairedView(for: v){
-            let cDelay = CGFloat(sortedSubviews.count) * deltaTime + initialDelay
-            context[v, "delay"] = ["\(cDelay)"]
-            context[pairedView, "delay"] = ["\(cDelay)"]
+      if delayMatchedViews {
+        for i in (viewIndex+1)..<views.count{
+          let otherView = views[i]
+          if otherView.superview == fv.superview {
+            break
+          }
+          if let pairedView = context.pairedView(for: otherView){
+            let delay = TimeInterval(sortedSubviews.count) * deltaTime + initialDelay
+            context[otherView]!.delay = delay
+            context[pairedView]!.delay = delay
           }
         }
       }
